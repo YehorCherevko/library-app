@@ -1,5 +1,5 @@
 import { Module } from '@nestjs/common';
-import { BooksModule } from './books/books.module';
+import { BooksModule } from './books/book.module';
 import { AuthorModule } from './author/author.module';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { ConfigModule, ConfigService } from '@nestjs/config';
