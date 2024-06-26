@@ -8,4 +8,7 @@ export class CreateAuthorDto {
   @IsNotEmpty()
   @IsString()
   lastName: string;
+
+  @IsString()
+  bio?: string;
 }
