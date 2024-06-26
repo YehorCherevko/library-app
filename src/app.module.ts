@@ -3,6 +3,7 @@ import { BooksModule } from './book/book.module';
 import { AuthorModule } from './author/author.module';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { ConfigModule, ConfigService } from '@nestjs/config';
+import { UserModule } from './user/user.module';
 
 @Module({
   imports: [
@@ -23,6 +24,7 @@ import { ConfigModule, ConfigService } from '@nestjs/config';
       }),
       inject: [ConfigService],
     }),
+    UserModule,
   ],
 })
 export class AppModule {}
