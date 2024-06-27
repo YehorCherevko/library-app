@@ -48,4 +48,8 @@ export class UserService {
       throw new NotFoundException('User not found');
     }
   }
+
+  async findByEmail(email: string): Promise<User> {
+    return this.usersRepository.findOne({ where: { email } });
+  }
 }
