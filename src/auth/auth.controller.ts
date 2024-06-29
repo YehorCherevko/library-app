@@ -1,9 +1,7 @@
-// src/auth/auth.controller.ts
 import { Controller, Post, Body, UseGuards, Req } from '@nestjs/common';
 import { AuthService } from './auth.service';
 import { UserService } from '../user/user.service';
 import { Request } from 'express';
-import * as bcrypt from 'bcrypt';
 import { UserRole } from '../user/entity/user.entity';
 import { AuthGuard } from '@nestjs/passport';
 
@@ -24,10 +22,7 @@ export class AuthController {
   async register(
     @Body() body: { name: string; email: string; password: string },
   ) {
-    const user = await this.userService.create({
-      ...body,
-      password: await bcrypt.hash(body.password, 10),
-    });
+    const user = await this.userService.create(body);
     return this.authService.login(user);
   }
 
@@ -37,7 +32,6 @@ export class AuthController {
   ) {
     const user = await this.userService.create({
       ...body,
-      password: await bcrypt.hash(body.password, 10),
       role: UserRole.ADMIN,
     });
     return this.authService.login(user);
