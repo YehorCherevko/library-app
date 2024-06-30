@@ -7,6 +7,8 @@ import { UserModule } from './user/user.module';
 import { AuthModule } from './auth/auth.module';
 import { BorrowModule } from './borrow/borrow.module';
 import { ReviewModule } from './review/review.module';
+import { RedisModule } from './redis/redis.module';
+import { LoggerModule } from './logger/logger.module';
 
 @Module({
   imports: [
@@ -31,6 +33,8 @@ import { ReviewModule } from './review/review.module';
     AuthModule,
     BorrowModule,
     ReviewModule,
+    RedisModule,
+    LoggerModule,
   ],
 })
 export class AppModule {}
