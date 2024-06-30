@@ -6,6 +6,8 @@ import { Book } from './entity/book.entity';
 import { Author } from '../author/entity/author.entity';
 import { UpdateBookDto } from './dto/update-book.dto';
 import { FindManyOptions } from 'typeorm';
+import { RedisCacheService } from '../redis/redis-cache.service';
+import { LoggerService } from '../logger/logger.service';
 
 @Injectable()
 export class BookService {
@@ -14,6 +16,8 @@ export class BookService {
     private booksRepository: Repository<Book>,
     @InjectRepository(Author)
     private authorRepository: Repository<Author>,
+    private readonly cacheService: RedisCacheService,
+    private readonly logger: LoggerService,
   ) {}
 
   async create(createBookDto: CreateBookDto): Promise<Book> {
@@ -40,15 +44,28 @@ export class BookService {
   }
 
   async findOne(id: string): Promise<Book> {
+    this.logger.log(`Fetching book with ID ${id}`);
+
+    const cacheKey = `book:${id}`;
+    const cachedBook = await this.cacheService.get(cacheKey);
+
+    if (cachedBook) {
+      this.logger.log(`Found book with ID ${id} in cache`);
+      return JSON.parse(cachedBook);
+    }
+
     const book = await this.booksRepository.findOne({
-      where: { id, deleted_at: null },
+      where: { id },
       relations: ['author'],
     });
 
     if (!book) {
+      this.logger.warn(`Book with ID ${id} not found`);
       throw new NotFoundException('Book was not found');
     }
 
+    await this.cacheService.set(cacheKey, JSON.stringify(book), 3600);
+    this.logger.log(`Cached book with ID ${id}`);
     return book;
   }
 
