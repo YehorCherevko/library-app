@@ -5,6 +5,7 @@ import { Borrow } from './entity/borrow.entity';
 import { CreateBorrowDto } from './dto/create-borrow.dto';
 import { User } from '../user/entity/user.entity';
 import { Book } from '../book/entity/book.entity';
+import { LoggerService } from '../logger/logger.service';
 
 @Injectable()
 export class BorrowService {
@@ -15,10 +16,15 @@ export class BorrowService {
     private userRepository: Repository<User>,
     @InjectRepository(Book)
     private bookRepository: Repository<Book>,
+    private readonly logger: LoggerService,
   ) {}
 
   async borrowBook(createBorrowDto: CreateBorrowDto): Promise<Borrow> {
     const { userId, bookId, dueDate } = createBorrowDto;
+
+    this.logger.log(
+      `Attempting to borrow book with ID ${bookId} for user ID ${userId}`,
+    );
 
     const user = await this.userRepository.findOne({
       where: { id: userId, deleted_at: null },
@@ -28,11 +34,13 @@ export class BorrowService {
     });
 
     if (!user || !book) {
+      this.logger.warn(
+        `User or Book not found: userId=${userId}, bookId=${bookId}`,
+      );
       throw new NotFoundException('User or Book not found');
     }
 
     const borrowDate = new Date();
-
     const borrow = this.borrowRepository.create({
       user,
       book,
@@ -40,18 +48,25 @@ export class BorrowService {
       dueDate: new Date(dueDate),
     });
 
-    return this.borrowRepository.save(borrow);
+    const savedBorrow = await this.borrowRepository.save(borrow);
+    this.logger.log(`Book borrowed successfully: borrowId=${savedBorrow.id}`);
+
+    return savedBorrow;
   }
 
   async returnBook(borrowId: string): Promise<void> {
+    this.logger.log(`Attempting to return book with borrow ID ${borrowId}`);
+
     const borrow = await this.borrowRepository.findOne({
       where: { id: borrowId },
     });
 
     if (!borrow) {
+      this.logger.warn(`Borrow record not found: borrowId=${borrowId}`);
       throw new NotFoundException('Borrow record not found');
     }
 
     await this.borrowRepository.remove(borrow);
+    this.logger.log(`Book returned successfully: borrowId=${borrowId}`);
   }
 }
