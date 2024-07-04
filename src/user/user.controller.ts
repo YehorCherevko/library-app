@@ -7,6 +7,7 @@ import {
   Put,
   Delete,
   UseGuards,
+  Query,
 } from '@nestjs/common';
 import { UserService } from './user.service';
 import { CreateUserDto } from './dto/create-user.dto';
@@ -30,8 +31,8 @@ export class UserController {
   @Get()
   @UseGuards(AuthGuard('jwt'), RolesGuard)
   @Roles(UserRole.ADMIN)
-  findAll() {
-    return this.userService.findAll();
+  findAll(@Query('limit') limit = 10, @Query('offset') offset = 0) {
+    return this.userService.findAll(limit, offset);
   }
 
   @Get(':id')

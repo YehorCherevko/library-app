@@ -30,9 +30,9 @@ export class UserService {
     return savedUser;
   }
 
-  async findAll(): Promise<User[]> {
+  async findAll(limit: number, offset: number): Promise<User[]> {
     this.logger.log('Fetching all users');
-    const cacheKey = 'users:all';
+    const cacheKey = `users:all:${limit}:${offset}`;
     const cachedUsers = await this.cacheService.get(cacheKey);
 
     if (cachedUsers) {
@@ -42,6 +42,8 @@ export class UserService {
 
     const users = await this.usersRepository.find({
       where: { deleted_at: null },
+      take: limit,
+      skip: offset,
     });
     await this.cacheService.set(cacheKey, JSON.stringify(users), 3600);
     this.logger.log('Cached all users');
