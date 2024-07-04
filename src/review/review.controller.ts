@@ -1,4 +1,3 @@
-// src/review/review.controller.ts
 import { Controller, Post, Body, Get, Param, UseGuards } from '@nestjs/common';
 import { ReviewService } from './review.service';
 import { CreateReviewDto } from './dto/create-review.dto';
